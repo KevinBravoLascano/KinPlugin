@@ -6,6 +6,7 @@ api-version: 1.13
 
 
 commands:
-  miplugin: Comando principal del plugin
-  aliases:
-    -kin
+  miplugin:
+    description: Comando principal del plugin
+    aliases:
+      - kin
