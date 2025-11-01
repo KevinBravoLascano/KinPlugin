@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="KinPlugin:jar">
+    <output-path>$USER_HOME$/servers/plugins</output-path>
+    <root id="archive" name="KinPlugin.jar">
+      <element id="module-output" name="KinPlugin" />
+    </root>
+  </artifact>
+</component>

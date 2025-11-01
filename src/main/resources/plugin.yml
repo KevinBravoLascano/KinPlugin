@@ -1,0 +1,11 @@
+main: mp.example.KinPlugin
+version: 1.0.0
+name: KinPlugin
+author: Maestrokin
+api-version: 1.13
+
+
+commands:
+  miplugin: Comando principal del plugin
+  aliases:
+    -kin
