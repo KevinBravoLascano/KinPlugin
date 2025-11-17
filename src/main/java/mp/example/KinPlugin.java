@@ -1,6 +1,7 @@
 package mp.example;
 
 import mp.example.commands.MainCommand;
+import mp.example.listeners.PlayerListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -8,6 +9,7 @@ public class KinPlugin extends JavaPlugin {
     private String version = getDescription().getVersion();
     public void onEnable() {
         registerCommands();
+        registerEvents();
         Bukkit.getConsoleSender().sendMessage("[KinPlugin"+version+"] Plugin Enabled");
     }
 
@@ -17,5 +19,9 @@ public class KinPlugin extends JavaPlugin {
 
     public void registerCommands() {
         this.getCommand("miplugin").setExecutor(new MainCommand());
+    }
+
+    public void registerEvents() {
+        getServer().getPluginManager().registerEvents(new PlayerListener(),this);
     }
 }
