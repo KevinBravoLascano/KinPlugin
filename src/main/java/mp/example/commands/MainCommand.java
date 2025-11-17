@@ -17,7 +17,11 @@ public class MainCommand implements CommandExecutor {
         }
         //jugador hace el comando
         Player player = (Player) Sender;
-        Sender.sendMessage(MessageUtils.getColoredMessage("dale bro"));
+        if(args.length>=1){
+            if(args[0].equalsIgnoreCase("help")){
+                Sender.sendMessage(MessageUtils.getColoredMessage("&cCriste que te ayudaria? Ja"));
+            }
+        }
         return true;
     }
 }
