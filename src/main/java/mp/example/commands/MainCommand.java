@@ -1,11 +1,14 @@
 package mp.example.commands;
 
 import mp.example.utils.MessageUtils;
+import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.awt.*;
 
 public class MainCommand implements CommandExecutor {
     @Override
@@ -20,6 +23,14 @@ public class MainCommand implements CommandExecutor {
         if(args.length>=1){
             if(args[0].equalsIgnoreCase("help")){
                 Sender.sendMessage(MessageUtils.getColoredMessage("&cCriste que te ayudaria? Ja"));
+            }
+            if(args[0].equalsIgnoreCase("verde")){
+                String simbolo = "◉";
+
+                player.sendTitle(simbolo, "Círculo mágico!", 10, 60, 10);
+
+
+
             }
         }
         return true;
