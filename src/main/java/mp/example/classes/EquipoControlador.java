@@ -2,9 +2,7 @@ package mp.example.classes;
 
 import org.bukkit.entity.Player;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class EquipoControlador {
     private Map<String,Equipo> teams = new HashMap<>();
@@ -42,4 +40,30 @@ public class EquipoControlador {
     public Collection<Equipo> getAllTeams() {
         return teams.values();
     }
+
+    public boolean crearEquipoRandom(List<Player> players, int tamaño) {
+        teams.clear();
+
+        int numEquipos = (int) Math.ceil((double) players.size() / tamaño);
+
+        // Crear los equipos
+        for (int i = 0; i < numEquipos; i++) {
+            Equipo e = new Equipo("Equipo " + (i + 1), tamaño);
+            teams.put("Equipo " + (i + 1), e);
+        }
+
+        // Convertir a lista para acceder por índice
+        List<Equipo> listaEquipos = new ArrayList<>(teams.values());
+
+        // Mezclar jugadores y asignar
+        Collections.shuffle(players);
+        int index = 0;
+        for (Player p : players) {
+            listaEquipos.get(index).addPlayer(p);
+            index = (index + 1) % listaEquipos.size();
+        }
+
+        return true;
+    }
+
 }

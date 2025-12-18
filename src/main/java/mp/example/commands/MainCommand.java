@@ -15,7 +15,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.awt.*;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class MainCommand implements CommandExecutor {
 
@@ -35,7 +37,11 @@ public class MainCommand implements CommandExecutor {
 
         //jugador hace el comando
         Player player = (Player) Sender;
-
+        // Comprobar si es OP (administrador del servidor)
+        if (!player.isOp()) {
+            player.sendMessage("§cNo tienes permisos para usar este comando.");
+            return true;
+        }
         if(args.length>=1){
 
             if(args[0].equalsIgnoreCase("help")){
@@ -43,7 +49,7 @@ public class MainCommand implements CommandExecutor {
                 Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin rojo (poner luz roja) \n"));
                 Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo crear <nombre> <tamaño> (crear equipos de x nombre y x capacidad) \n"));
                 Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo entrar <nombre> <jugador> (entrar en x equipo) \n"));
-
+                Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo random  <tamañoEquipos> \n"));
             }
 
             //luz gverde luz rojoa squids
@@ -62,8 +68,10 @@ public class MainCommand implements CommandExecutor {
                 String simbolo = "§c◉";
 
 
-                player.sendTitle(simbolo, "Luz ROJA no avances o seras eliminado", 10, 60, 10);
 
+                for (Player p : plugin.getServer().getOnlinePlayers()) {
+                    p.sendTitle("","Luz ROJA no avances o seras eliminado", 10, 60, 10);
+                }
                 // Guardar X y Z del jugador en este momento
 
                 for(Player p : Bukkit.getOnlinePlayers()) {
@@ -125,12 +133,61 @@ public class MainCommand implements CommandExecutor {
                         }
                     }
                 }
+                if (args[1].equalsIgnoreCase("random")) {
 
-            }
+                    int tamaño;
+
+                    try {
+                        tamaño = Integer.parseInt(args[2]);
+                    } catch (NumberFormatException e) {
+                        Sender.sendMessage("§cEl tamaño del equipo debe ser un número.");
+                        return true;
+                    }
+
+                    if (tamaño <= 0) {
+                        Sender.sendMessage("§cEl tamaño del equipo debe ser mayor que 0.");
+                        return true;
+                    }
+
+                    List<Player> jugadores = Bukkit.getOnlinePlayers().stream()
+                            .filter(p -> p.getGameMode() != GameMode.SPECTATOR)
+                            .collect(Collectors.toList());
+
+                    if (jugadores.isEmpty()) {
+                        Sender.sendMessage("§cNo hay jugadores disponibles.");
+                        return true;
+                    }
+
+                    plugin.getEquipoControlador().crearEquipoRandom(jugadores, tamaño);
+                    Sender.sendMessage("§aEquipos generados correctamente.");
+                    for (Equipo e : plugin.getEquipoControlador().getAllTeams()) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("§a").append(e.getNombre()).append(" §7miembros: ");
+
+                        for (UUID id : e.getPlayers().keySet()) {
+                            Player p = Bukkit.getPlayer(id);
+                            if (p != null) {
+                                sb.append(p.getName()).append(", ");
+                            }
+                        }
+
+                        // Quitar la última coma
+                        if (sb.length() > 2) {
+                            sb.setLength(sb.length() - 2);
+                        }
+
+                        for (Player p : plugin.getServer().getOnlinePlayers()) {
+                            p.sendMessage(sb.toString());
+                        }
+                    }
+
+
+
+
 
             if(args[0].equalsIgnoreCase("iniciarParejas")){
                 for(Equipo team : plugin.getEquipoControlador().getAllTeams()){
-                    String[] mensajes = {"El juego empieza en..\n","3\n", "2\n", "1\n"};
+                    String[] mensajes = {"El juego empieza en..\n","3\n", "2\n", "1\n", "YA\n"};
 
                     new BukkitRunnable() {
                         int index = 0;
@@ -189,6 +246,9 @@ public class MainCommand implements CommandExecutor {
             }
 
 
+        }
+        return true;
+    }
         }
         return true;
     }
