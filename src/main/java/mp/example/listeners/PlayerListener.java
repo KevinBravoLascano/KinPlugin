@@ -10,7 +10,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 
-public class PlayerListener implements Listener {
+public class
+
+PlayerListener implements Listener {
     private KinPlugin plugin;
 
     public PlayerListener(KinPlugin plugin){

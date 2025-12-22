@@ -1,6 +1,7 @@
 package mp.example;
 import mp.example.classes.EquipoControlador;
 import mp.example.commands.MainCommand;
+import mp.example.juegos.GameManager;
 import mp.example.listeners.JuegoParejas;
 import mp.example.listeners.PlayerListener;
 import org.bukkit.Bukkit;
@@ -13,6 +14,7 @@ public class KinPlugin extends JavaPlugin {
     private String version = getDescription().getVersion();
     public HashMap<UUID, double[]> coords = new HashMap<>();
     private EquipoControlador equipoControlador;
+    public GameManager gameManager = new GameManager();
     public void onEnable() {
 
         registerCommands();
@@ -31,7 +33,7 @@ public class KinPlugin extends JavaPlugin {
     }
 
     public void registerCommands() {
-        this.getCommand("miplugin").setExecutor(new MainCommand(this));
+        this.getCommand("miplugin").setExecutor(new MainCommand(this, gameManager));
     }
 
     public void registerEvents() {

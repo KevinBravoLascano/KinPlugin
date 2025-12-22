@@ -1,7 +1,9 @@
 package mp.example.commands;
 
 import mp.example.KinPlugin;
+import mp.example.classes.Contador;
 import mp.example.classes.Equipo;
+import mp.example.juegos.GameManager;
 import mp.example.utils.MessageUtils;
 import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.Bukkit;
@@ -22,8 +24,10 @@ import java.util.stream.Collectors;
 public class MainCommand implements CommandExecutor {
 
     private KinPlugin plugin;
-    public MainCommand(KinPlugin plugin) {
+    private GameManager gameManager;
+    public MainCommand(KinPlugin plugin, GameManager gameManager) {
         this.plugin = plugin;
+        this.gameManager =gameManager;
     }
 
     @Override
@@ -50,6 +54,7 @@ public class MainCommand implements CommandExecutor {
                 Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo crear <nombre> <tamaño> (crear equipos de x nombre y x capacidad) \n"));
                 Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo entrar <nombre> <jugador> (entrar en x equipo) \n"));
                 Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo random  <tamañoEquipos> \n"));
+                Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin luces  <tiempo contador en s> \n"));
             }
 
             //luz gverde luz rojoa squids
@@ -180,6 +185,7 @@ public class MainCommand implements CommandExecutor {
                             p.sendMessage(sb.toString());
                         }
                     }
+                }
 
 
 
@@ -210,7 +216,7 @@ public class MainCommand implements CommandExecutor {
                     }
             }
 
-        }
+            }
             if(args[0].equalsIgnoreCase("detenerParejas")) {
 
                 for(Equipo team : plugin.getEquipoControlador().getAllTeams()) {
@@ -243,12 +249,40 @@ public class MainCommand implements CommandExecutor {
                     }
                 }
             }
+            if(args[0].equalsIgnoreCase("luces")){
+                int secondsLeft = Integer.parseInt(args[1]);
+                Contador contador = new Contador(
+                        plugin,
+                        secondsLeft,
+
+                        // onTick
+                        () -> Bukkit.broadcastMessage(
+                                "⏳ Tiempo restante: " + secondsLeft
+                        ),
+
+                        // onFinish
+                        () -> {
+                            Bukkit.broadcastMessage("⛔ Tiempo terminado");
+
+                            for (Player players : Bukkit.getOnlinePlayers()) {
+                                if (!gameManager.isPlayerSafe(player)) {
+                                    players.setHealth(0.0);
+                                } else {
+                                    players.sendMessage("✅ Sobreviviste");
+                                }
+                            }
+
+                            gameManager.stopGame();
+                        }
+                );
+            }
 
 
         }
         return true;
     }
-        }
         return true;
     }
-}
+
+    }
+
