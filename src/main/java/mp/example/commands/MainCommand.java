@@ -219,7 +219,6 @@ public class MainCommand implements CommandExecutor {
                     Player menor = null;
 
                     team.broadcast("§b--- Clicks del equipo " + team.getNombre() + " ---");
-                    player.sendMessage("§b--- Clicks del equipo " + team.getNombre() + " ---");
 
                     for(UUID uuid : team.getPlayers().keySet()) {
 
@@ -234,7 +233,7 @@ public class MainCommand implements CommandExecutor {
                         }
 
                         team.broadcast(p.getName() + " : §a" + clicks + " clicks");
-                        player.sendMessage(p.getName() + " : §a" + clicks + " clicks");
+
                     }
 
                     // Eliminar jugador con menos clicks
