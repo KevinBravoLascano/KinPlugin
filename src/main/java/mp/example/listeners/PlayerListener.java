@@ -4,6 +4,7 @@ import mp.example.utils.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -33,34 +34,37 @@ PlayerListener implements Listener {
     }
 
     @EventHandler
-    public void onMove(PlayerMoveEvent e) { //evento captado para hace el minijuego luz roja  luz verde
+    public void onMove(PlayerMoveEvent e) {
         Player p = e.getPlayer();
-
-        if (!plugin.coords.containsKey(p.getUniqueId())) return;
-
-        double[] start = plugin.coords.get(p.getUniqueId());
-        int x0 = (int) start[0];
-        int z0 = (int) start[1];
-
         Location loc = e.getTo();
+        if (loc == null) return;
 
-        if(loc==null){
-            return;
+        Material blockUnder = loc.getBlock().getRelative(0, -1, 0).getType();
+
+        // Si pisa RED_WOOL, siempre se marca seguro
+        if (blockUnder == Material.RED_WOOL && !plugin.gameManager.isPlayerSafe(p)) {
+            plugin.gameManager.markPlayerSafe(p);
+            p.sendMessage("§a¡Zona segura alcanzada!");
         }
 
-        int x= loc.getBlockX();
-        int z= loc.getBlockZ();
+        // Solo elimina si la luz es roja y el jugador no está seguro
+        if (plugin.gameManager.isRedLight() && !plugin.gameManager.isPlayerSafe(p)) {
+            double[] start = plugin.coords.getOrDefault(p.getUniqueId(), new double[]{loc.getBlockX(), loc.getBlockZ()});
+            int x0 = (int) start[0];
+            int z0 = (int) start[1];
 
-        if (x != x0 || z != z0) {
-            p.sendMessage("§cTe moviste → eliminado");
-            p.setGameMode(GameMode.SPECTATOR);
+            int x = loc.getBlockX();
+            int z = loc.getBlockZ();
 
-            plugin.coords.remove(p.getUniqueId());
-
-            // Mensaje a todos los jugadores
-            Bukkit.broadcastMessage("§cjugador " + p.getName() + " ¡se movió y ha sido eliminado!");
+            if (x != x0 || z != z0) {
+                p.sendMessage("§cTe moviste → eliminado");
+                p.setGameMode(GameMode.SPECTATOR);
+                plugin.coords.remove(p.getUniqueId());
+                Bukkit.broadcastMessage("§cJugador " + p.getName() + " ¡se movió y ha sido eliminado!");
+            }
         }
-
     }
+
+
 
 }

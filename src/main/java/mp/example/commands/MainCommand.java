@@ -5,6 +5,7 @@ import mp.example.classes.Contador;
 import mp.example.classes.Equipo;
 import mp.example.juegos.GameManager;
 import mp.example.utils.MessageUtils;
+import mp.example.visuales.GameHUD;
 import net.md_5.bungee.api.ChatMessageType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,6 +15,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+
+
 
 import java.awt.*;
 import java.util.HashMap;
@@ -58,40 +63,27 @@ public class MainCommand implements CommandExecutor {
             }
 
             //luz gverde luz rojoa squids
-            if(args[0].equalsIgnoreCase("verde")){
-                plugin.coords.clear();
-
-                // Título verde para todos los jugadores
-                for (Player p : plugin.getServer().getOnlinePlayers()) {
+            if(args[0].equalsIgnoreCase("verde")) {
+                gameManager.setRed(false); // luz verde
+                plugin.coords.clear(); // limpiar coordenadas iniciales
+                for (Player p : Bukkit.getOnlinePlayers()) {
                     p.sendTitle("§a◉", "Luz VERDE, pueden avanzar!", 10, 60, 10);
                 }
-
-
             }
 
-            if(args[0].equalsIgnoreCase("rojo")){
-                String simbolo = "§c◉";
-
-
-
-                for (Player p : plugin.getServer().getOnlinePlayers()) {
-                    p.sendTitle("","Luz ROJA no avances o seras eliminado", 10, 60, 10);
-                }
-                // Guardar X y Z del jugador en este momento
-
-                for(Player p : Bukkit.getOnlinePlayers()) {
+            if(args[0].equalsIgnoreCase("rojo")) {
+                gameManager.setRed(true); // luz roja
+                for (Player p : Bukkit.getOnlinePlayers()) {
                     double x = p.getLocation().getBlockX();
                     double z = p.getLocation().getBlockZ();
-                    plugin.coords.put(p.getUniqueId(), new double[]{x, z});
+                    plugin.coords.put(p.getUniqueId(), new double[]{x, z}); // guardar posición
+                    p.sendTitle("§c◉", "Luz ROJA, no avances!", 10, 60, 10);
                 }
-
-
-
             }
 
             //comadno para equipos
-            if(args[0].equalsIgnoreCase("equipo")){
-                if(args[1].equalsIgnoreCase("crear")){
+            if(args[0].equalsIgnoreCase("equipo")) {
+                if (args[1].equalsIgnoreCase("crear")) {
                     String nombre = args[2];
                     int maxSize;
                     try {
@@ -106,7 +98,7 @@ public class MainCommand implements CommandExecutor {
                             "§cEse equipo ya existe");
                     return true;
                 }
-                if(args[1].equalsIgnoreCase("entrar")){
+                if (args[1].equalsIgnoreCase("entrar")) {
                     String name = args[2];
                     String jugador = args[3];
                     Player p = Bukkit.getPlayer(jugador);
@@ -116,7 +108,7 @@ public class MainCommand implements CommandExecutor {
                             "§cNo se pudo unir (¿lleno o no existe?)");
                     return true;
                 }
-                if(args[1].equalsIgnoreCase("salir")){
+                if (args[1].equalsIgnoreCase("salir")) {
                     String jugador = args[2];
                     Player p = Bukkit.getPlayer(jugador);
                     boolean ok = plugin.getEquipoControlador().removePlayerFromTeam(p);
@@ -125,16 +117,16 @@ public class MainCommand implements CommandExecutor {
                             "§cNo estás en ningún equipo.");
                     return true;
                 }
-                if(args[1].equalsIgnoreCase("info")){
-                    for(Equipo team : plugin.getEquipoControlador().getAllTeams()){
+                if (args[1].equalsIgnoreCase("info")) {
+                    for (Equipo team : plugin.getEquipoControlador().getAllTeams()) {
                         team.broadcast("Clicks del equipo\n");
-                        player.sendMessage("Clicks del equipo :"+ team.getNombre()+"\n");
-                        for(UUID uuid : team.getPlayers().keySet()){
+                        player.sendMessage("Clicks del equipo :" + team.getNombre() + "\n");
+                        for (UUID uuid : team.getPlayers().keySet()) {
                             Player p = Bukkit.getPlayer(uuid);
                             assert p != null;
-                            int clicks= team.getClicks(p);
-                            team.broadcast(p.getName()+" :"+clicks+" realizados");
-                            player.sendMessage(p.getName()+" :"+clicks+" realizados");
+                            int clicks = team.getClicks(p);
+                            team.broadcast(p.getName() + " :" + clicks + " realizados");
+                            player.sendMessage(p.getName() + " :" + clicks + " realizados");
                         }
                     }
                 }
@@ -186,14 +178,14 @@ public class MainCommand implements CommandExecutor {
                         }
                     }
                 }
-
+            }
 
 
 
 
             if(args[0].equalsIgnoreCase("iniciarParejas")){
-                for(Equipo team : plugin.getEquipoControlador().getAllTeams()){
-                    String[] mensajes = {"El juego empieza en..\n","3\n", "2\n", "1\n", "YA\n"};
+                for(Equipo team : plugin.getEquipoControlador().getAllTeams()) {
+                    String[] mensajes = {"El juego empieza en..\n", "3\n", "2\n", "1\n", "YA\n"};
 
                     new BukkitRunnable() {
                         int index = 0;
@@ -208,15 +200,16 @@ public class MainCommand implements CommandExecutor {
                             team.broadcast(mensajes[index]);
                             index++;
                         }
-                }.runTaskTimer(plugin, 0L, 40L); // 2 segundos entre cada mensaje
-                    for(UUID uuid : team.getPlayers().keySet()){
+                    }.runTaskTimer(plugin, 0L, 40L); // 2 segundos entre cada mensaje
+                    for (UUID uuid : team.getPlayers().keySet()) {
                         Player p = Bukkit.getPlayer(uuid);
                         assert p != null;
                         team.resetClicks(p);
                     }
+                }
             }
 
-            }
+
             if(args[0].equalsIgnoreCase("detenerParejas")) {
 
                 for(Equipo team : plugin.getEquipoControlador().getAllTeams()) {
@@ -249,40 +242,49 @@ public class MainCommand implements CommandExecutor {
                     }
                 }
             }
-            if(args[0].equalsIgnoreCase("luces")){
+            if(args[0].equalsIgnoreCase("luces")) {
                 int secondsLeft = Integer.parseInt(args[1]);
+
+                final Contador[] contadorHolder = new Contador[1];
+
                 Contador contador = new Contador(
                         plugin,
                         secondsLeft,
-
-                        // onTick
-                        () -> Bukkit.broadcastMessage(
-                                "⏳ Tiempo restante: " + secondsLeft
-                        ),
-
-                        // onFinish
+                        () -> {
+                            int tiempoRestante = contadorHolder[0].getSecondsLeft();
+                            var vivos = plugin.gameManager.getPlayersAlive();
+                            boolean luzRoja = plugin.gameManager.isRedLight();
+                            GameHUD.updateTimer(tiempoRestante, luzRoja, vivos);
+                        },
                         () -> {
                             Bukkit.broadcastMessage("⛔ Tiempo terminado");
+                            var vivos = plugin.gameManager.getPlayersAlive();
+                            for (Player p : vivos) {
+                                p.setGameMode(GameMode.SPECTATOR);
+                            }
 
-                            for (Player players : Bukkit.getOnlinePlayers()) {
-                                if (!gameManager.isPlayerSafe(player)) {
-                                    players.setHealth(0.0);
-                                } else {
-                                    players.sendMessage("✅ Sobreviviste");
+                            for (Player p : Bukkit.getOnlinePlayers()) {
+                                if (plugin.gameManager.isPlayerSafe(p)) {
+                                    p.sendMessage("✅ Sobreviviste");
                                 }
                             }
 
+                            GameHUD.clearTimer();
                             gameManager.stopGame();
                         }
                 );
+
+                contadorHolder[0] = contador; // asignar al holder
+                gameManager.startGame(contador); // startGame inicia el contador
             }
 
 
         }
-        return true;
+        return  true;
     }
-        return true;
-    }
+}
 
-    }
+
+
+
 
