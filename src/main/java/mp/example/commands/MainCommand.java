@@ -3,6 +3,7 @@ package mp.example.commands;
 import mp.example.KinPlugin;
 import mp.example.classes.Contador;
 import mp.example.classes.Equipo;
+import mp.example.classes.Habitacion;
 import mp.example.juegos.GameManager;
 import mp.example.utils.MessageUtils;
 import mp.example.visuales.GameHUD;
@@ -52,15 +53,33 @@ public class MainCommand implements CommandExecutor {
             return true;
         }
         if(args.length>=1){
+            //generar hasbitaciones
+            if(args[0].equalsIgnoreCase("generarHabitacion")){
+                int x = Integer.parseInt(args[1]);
+                int y = Integer.parseInt(args[2]);
+                int z = Integer.parseInt(args[3]);
 
-            if(args[0].equalsIgnoreCase("help")){
-                Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin verde (poner luz verde) \n"));
-                Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin rojo (poner luz roja) \n"));
-                Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo crear <nombre> <tamaño> (crear equipos de x nombre y x capacidad) \n"));
-                Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo entrar <nombre> <jugador> (entrar en x equipo) \n"));
-                Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo random  <tamañoEquipos> \n"));
-                Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin luces  <tiempo contador en s> \n"));
+                Habitacion habitacion = new Habitacion((Player) Sender,x,y,z);
+                habitacion.generar();
+                return true;
             }
+            //sacar help de comandos
+            if(args[0].equalsIgnoreCase("help")){
+                help(args,Sender);
+                return true;
+            }
+            //borrar equipos creados
+            if(args[0].equalsIgnoreCase("clear")){
+                plugin.getEquipoControlador().borrarEquipos();
+            }
+            //dar objeto a equipo concreto
+            if(args[0].equalsIgnoreCase("give")){
+                String equipo = args[1];
+                String Item =  args[2];
+                String cantidad=args[3];
+                plugin.getEquipoControlador().giveEquipo(equipo,Item,cantidad);
+            }
+
 
             //luz gverde luz rojoa squids
             if(args[0].equalsIgnoreCase("verde")) {
@@ -84,18 +103,7 @@ public class MainCommand implements CommandExecutor {
             //comadno para equipos
             if(args[0].equalsIgnoreCase("equipo")) {
                 if (args[1].equalsIgnoreCase("crear")) {
-                    String nombre = args[2];
-                    int maxSize;
-                    try {
-                        maxSize = Integer.parseInt(args[3]);
-                    } catch (Exception e) {
-                        player.sendMessage("§cEl tamaño debe ser un número.");
-                        return true;
-                    }
-                    boolean ok = plugin.getEquipoControlador().crearEquipo(nombre, maxSize);
-                    player.sendMessage(ok ?
-                            "§aEquipo creado: " + nombre :
-                            "§cEse equipo ya existe");
+                    crearEquipo(args, Sender);
                     return true;
                 }
                 if (args[1].equalsIgnoreCase("entrar")) {
@@ -243,44 +251,74 @@ public class MainCommand implements CommandExecutor {
                 }
             }
             if(args[0].equalsIgnoreCase("luces")) {
-                int secondsLeft = Integer.parseInt(args[1]);
-
-                final Contador[] contadorHolder = new Contador[1];
-
-                Contador contador = new Contador(
-                        plugin,
-                        secondsLeft,
-                        () -> {
-                            int tiempoRestante = contadorHolder[0].getSecondsLeft();
-                            var vivos = plugin.gameManager.getPlayersAlive();
-                            boolean luzRoja = plugin.gameManager.isRedLight();
-                            GameHUD.updateTimer(tiempoRestante, luzRoja, vivos);
-                        },
-                        () -> {
-                            Bukkit.broadcastMessage("⛔ Tiempo terminado");
-                            var vivos = plugin.gameManager.getPlayersAlive();
-                            for (Player p : vivos) {
-                                p.setGameMode(GameMode.SPECTATOR);
-                            }
-
-                            for (Player p : Bukkit.getOnlinePlayers()) {
-                                if (plugin.gameManager.isPlayerSafe(p)) {
-                                    p.sendMessage("✅ Sobreviviste");
-                                }
-                            }
-
-                            GameHUD.clearTimer();
-                            gameManager.stopGame();
-                        }
-                );
-
-                contadorHolder[0] = contador; // asignar al holder
-                gameManager.startGame(contador); // startGame inicia el contador
+                luces(args);
             }
 
 
         }
         return  true;
+    }
+
+    //comando help para comandos
+    public void help(String[] args,CommandSender Sender) {
+        Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin verde (poner luz verde) \n"));
+        Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin rojo (poner luz roja) \n"));
+        Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo crear <nombre> <tamaño> (crear equipos de x nombre y x capacidad) \n"));
+        Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo entrar <nombre> <jugador> (entrar en x equipo) \n"));
+        Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin equipo random  <tamañoEquipos> \n"));
+        Sender.sendMessage(MessageUtils.getColoredMessage("&c/kin luces  <tiempo contador en s> \n"));
+    }
+    //comando para juego con timer de luces rojo verde
+    public void luces(String []args){
+        int secondsLeft = Integer.parseInt(args[1]);
+        plugin.gameManager.clearSafePlayers();
+        final Contador[] contadorHolder = new Contador[1];
+
+        Contador contador = new Contador(
+                plugin,
+                secondsLeft,
+                () -> {
+                    int tiempoRestante = contadorHolder[0].getSecondsLeft();
+                    var vivos = plugin.gameManager.getPlayersAlive();
+                    boolean luzRoja = plugin.gameManager.isRedLight();
+                    GameHUD.updateTimer(tiempoRestante, luzRoja, vivos);
+                },
+                () -> {
+                    Bukkit.broadcastMessage("⛔ Tiempo terminado");
+                    var vivos = plugin.gameManager.getPlayersAlive();
+                    for (Player p : vivos) {
+                        p.setGameMode(GameMode.SPECTATOR);
+                    }
+
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        if (plugin.gameManager.isPlayerSafe(p)) {
+                            p.sendMessage("✅ Sobreviviste");
+                        }
+                    }
+
+                    GameHUD.clearTimer();
+                    gameManager.stopGame();
+                }
+        );
+
+        contadorHolder[0] = contador; // asignar al holder
+        gameManager.startGame(contador); // startGame inicia el contador
+    }
+    //crear euipoo
+    public void crearEquipo(String[] args, CommandSender Sender) {
+        String nombre = args[2];
+        int maxSize= 0;
+        try {
+            maxSize = Integer.parseInt(args[3]);
+        } catch (Exception e) {
+            Sender.sendMessage("§cEl tamaño debe ser un número.");
+
+        }
+        boolean ok = plugin.getEquipoControlador().crearEquipo(nombre, maxSize);
+        Sender.sendMessage(ok ?
+                "§aEquipo creado: " + nombre :
+                "§cEse equipo ya existe");
+
     }
 }
 

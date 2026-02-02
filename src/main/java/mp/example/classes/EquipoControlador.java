@@ -1,5 +1,6 @@
 package mp.example.classes;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -14,6 +15,16 @@ public class EquipoControlador {
 
     public Equipo getEquipo(String equipo){
         return teams.get(equipo);
+    }
+
+    public void giveEquipo(String equipo,String item, String amount){
+        Equipo e = teams.get(equipo);
+        for (UUID uuid : e.getPlayers().keySet()) {
+            Player p = Bukkit.getPlayer(uuid);
+            String cmd = "give "+p.getName()+" "+item+" "+amount;
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),cmd);
+        }
+
     }
 
     public Equipo equipoJugador(Player player){
@@ -63,6 +74,10 @@ public class EquipoControlador {
             index = (index + 1) % listaEquipos.size();
         }
 
+        return true;
+    }
+    public boolean borrarEquipos(){
+        teams.clear();
         return true;
     }
 
