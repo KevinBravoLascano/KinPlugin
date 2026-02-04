@@ -7,7 +7,6 @@ import mp.example.juegos.HabitacionesManager;
 import mp.example.juegos.RedLightManager;
 import mp.example.listeners.JuegoParejas;
 import mp.example.listeners.PlayerListenerPisarBloque;
-import mp.example.listeners.PlayerListenerPisarBloque;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import java.util.HashMap;
@@ -21,8 +20,9 @@ public class KinPlugin extends JavaPlugin {
     public GameManager gameManager = new GameManager();
     public RedLightManager redLightManager;
     public HabitacionesManager habitacionesManager;
+    public JuegoParejas juegoParejas;
     public void onEnable() {
-
+        juegoParejas = new JuegoParejas(this);
         registerCommands();
         registerEvents();
         Bukkit.getConsoleSender().sendMessage("[KinPlugin"+version+"] Plugin Enabled");
@@ -49,7 +49,7 @@ public class KinPlugin extends JavaPlugin {
     public void registerEvents() {
 
         getServer().getPluginManager().registerEvents(new PlayerListenerPisarBloque(this),this);
-        getServer().getPluginManager().registerEvents(new JuegoParejas(this),this);
+        getServer().getPluginManager().registerEvents(juegoParejas,this);
     }
 
 }

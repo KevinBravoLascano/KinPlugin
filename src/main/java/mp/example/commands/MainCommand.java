@@ -6,6 +6,7 @@ import mp.example.classes.GameType;
 import mp.example.classes.Habitacion;
 import mp.example.interficies.MiniGame;
 import mp.example.juegos.GameManager;
+import mp.example.listeners.JuegoParejas;
 import mp.example.utils.MessageUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -23,10 +24,12 @@ public class MainCommand implements CommandExecutor {
 
     private final KinPlugin plugin;
     private final GameManager gameManager;
+    private final JuegoParejas juegoParejas;
 
     public MainCommand(KinPlugin plugin, GameManager gameManager) {
         this.plugin = plugin;
         this.gameManager = gameManager;
+        this.juegoParejas = plugin.juegoParejas;
     }
 
     @Override
@@ -48,6 +51,36 @@ public class MainCommand implements CommandExecutor {
         }
 
         switch (args[0].toLowerCase()) {
+            //parejas clicks
+            case "parejas" -> {
+
+                if (args.length < 2) {
+                    sender.sendMessage("§cUso: /parejas <tiempo>");
+                    return true;
+                }
+
+                int tiempo;
+
+                try {
+                    tiempo = Integer.parseInt(args[1]);
+                } catch (NumberFormatException e) {
+                    sender.sendMessage("§cEl tiempo debe ser un número");
+                    return true;
+                }
+
+                if (tiempo <= 0) {
+                    sender.sendMessage("§cEl tiempo debe ser mayor que 0");
+                    return true;
+                }
+
+                if (juegoParejas.isActivo()) {
+                    sender.sendMessage("§cEl juego ya está activo");
+                    return true;
+                }
+
+                juegoParejas.iniciarJuego(tiempo);
+                sender.sendMessage("§aJuego de parejas iniciado por " + tiempo + " segundos");
+            }
 
             // =========================
             // HABITACIONES
@@ -219,5 +252,6 @@ public class MainCommand implements CommandExecutor {
         sender.sendMessage(MessageUtils.getColoredMessage("&c/kin help - mostrar comandos"));
         sender.sendMessage(MessageUtils.getColoredMessage("&c/kin habitacion <segundos> "));
         sender.sendMessage(MessageUtils.getColoredMessage("&c/kin setobjetivo <numeroPersonas> - objetivo Habitaciones "));
+        sender.sendMessage(MessageUtils.getColoredMessage("&c/kin parejas <tiempo> "));
     }
 }
