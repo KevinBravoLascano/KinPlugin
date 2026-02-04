@@ -1,0 +1,50 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class Contador
+class Equipo
+class EquipoControlador
+class GameHUD
+class GameManager
+enum GameType << enumeration >>
+class GiveItemTab
+class HUDSidebar
+class Habitacion
+class HabitacionesManager
+class JuegoParejas
+class KinPlugin
+class MainCommand
+class MessageUtils
+class PlayerListenerPisarBloque
+class RedLightManager
+
+Contador                  "1" *-[#595959,plain]-> "plugin\n1" KinPlugin                 
+EquipoControlador         "1" *-[#595959,plain]-> "teams\n*" Equipo                    
+EquipoControlador          -[#595959,dashed]->  Equipo                    : "«create»"
+GameManager               "1" *-[#595959,plain]-> "contador\n1" Contador                  
+GameManager               "1" *-[#595959,plain]-> "playerGames\n*" GameType                  
+GiveItemTab               "1" *-[#595959,plain]-> "plugin\n1" KinPlugin                 
+HabitacionesManager       "1" *-[#595959,plain]-> "plugin\n1" KinPlugin                 
+JuegoParejas              "1" *-[#595959,plain]-> "plugin\n1" KinPlugin                 
+KinPlugin                  -[#595959,dashed]->  EquipoControlador         : "«create»"
+KinPlugin                 "1" *-[#595959,plain]-> "equipoControlador\n1" EquipoControlador         
+KinPlugin                 "1" *-[#595959,plain]-> "gameManager\n1" GameManager               
+KinPlugin                  -[#595959,dashed]->  GameManager               : "«create»"
+KinPlugin                  -[#595959,dashed]->  GiveItemTab               : "«create»"
+KinPlugin                 "1" *-[#595959,plain]-> "habitacionesManager\n1" HabitacionesManager       
+KinPlugin                  -[#595959,dashed]->  HabitacionesManager       : "«create»"
+KinPlugin                  -[#595959,dashed]->  JuegoParejas              : "«create»"
+KinPlugin                  -[#595959,dashed]->  MainCommand               : "«create»"
+KinPlugin                  -[#595959,dashed]->  PlayerListenerPisarBloque : "«create»"
+KinPlugin                  -[#595959,dashed]->  RedLightManager           : "«create»"
+KinPlugin                 "1" *-[#595959,plain]-> "redLightManager\n1" RedLightManager           
+MainCommand                -[#595959,dashed]->  Contador                  : "«create»"
+MainCommand               "1" *-[#595959,plain]-> "gameManager\n1" GameManager               
+MainCommand                -[#595959,dashed]->  Habitacion                : "«create»"
+MainCommand               "1" *-[#595959,plain]-> "plugin\n1" KinPlugin                 
+PlayerListenerPisarBloque "1" *-[#595959,plain]-> "plugin\n1" KinPlugin                 
+RedLightManager           "1" *-[#595959,plain]-> "plugin\n1" KinPlugin                 
+@enduml
